@@ -11,6 +11,10 @@
 |
 */
 
+
+use App\Post;
+use Illuminate\Http\Request;
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -18,3 +22,10 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+
+Route::put('update/posts/{post}', function(Post $post, Request $request){
+    $post->update([
+        'title' => 'Im updated',
+    ]);
+    return 'Post updated"';
+})->middleware('can:update,post');

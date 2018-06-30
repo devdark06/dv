@@ -5,7 +5,6 @@ namespace Tests\Unit;
 use App\Post;
 use Tests\TestCase;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class PolicyTest extends TestCase
@@ -19,7 +18,7 @@ class PolicyTest extends TestCase
 
         $post = factory(Post::class)->create();
 
-        $result = Gate::allows('update-post', $post);
+        $result = Gate::allows('update', $post);
 
         //Resultado
         $this->assertTrue($result);
@@ -32,7 +31,7 @@ class PolicyTest extends TestCase
 
         $post = factory(Post::class)->create();
 
-        $result = Gate::allows('update-post', $post);
+        $result = Gate::allows('update', $post);
 
         //Resultado
         $this->assertFalse($result);
@@ -46,8 +45,24 @@ class PolicyTest extends TestCase
             'user_id' => $user->id,
         ]);
 
-        $result = Gate::allows('update-post', $post);
+        $result = Gate::allows('update', $post);
 
         $this->assertTrue($result);
+    }
+
+    function test_admin_can_delete_posts()
+    {
+        $admin = $this->createAdmin();
+        $this->be($admin);
+        $post = factory(Post::class)->create();
+        $result = Gate::allows('delete', $post);
+        $this->assertTrue($result);
+    }
+
+    function test_user_cannot_delete_posts()
+    {
+        $user = $this->createUser();
+        $post = factory(Post::class)->create(['user_id' => $user->id]);
+        $this->assertFalse(Gate::forUser($user)->allows('delete', $post));
     }
 }
